@@ -6,22 +6,15 @@ deploy-to-gcp:
   image: google/cloud-sdk:alpine
   
   variables:
-    # Ces variables doivent être configurées dans GitLab CI/CD Settings
-    # GCP_PROJECT_ID: votre-projet-gcp
-    # GCP_SERVICE_ACCOUNT_KEY: clé JSON du compte de service (type: File)
-    # GCP_REGION: europe-west1
-    # IMAGE_NAME: nuxt-docker-app
     IMAGE_TAG: $CI_COMMIT_SHORT_SHA
   
   before_script:
-    # Authentification sécurisée à Google Cloud
     - echo $GCP_SERVICE_ACCOUNT_KEY > ${CI_PROJECT_DIR}/gcp-key.json
     - gcloud auth activate-service-account --key-file ${CI_PROJECT_DIR}/gcp-key.json
     - gcloud config set project $GCP_PROJECT_ID
     - gcloud config set compute/region $GCP_REGION
   
   script:
-    # Build et push de l'image Docker avec Cloud Build
     - |
       gcloud builds submit \
         --tag gcr.io/$GCP_PROJECT_ID/$IMAGE_NAME:$IMAGE_TAG \
@@ -30,11 +23,7 @@ deploy-to-gcp:
         .
   
   after_script:
-    # Nettoyage de la clé de service pour la sécurité
     - rm -f ${CI_PROJECT_DIR}/gcp-key.json
   
   only:
     - main
-  
-  # Optionnel: exécuter manuellement le déploiement
-  # when: manual
